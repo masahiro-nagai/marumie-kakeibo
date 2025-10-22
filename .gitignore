@@ -1,5 +1,6 @@
 # .envファイルなどをGitの管理対象から除外する
 .env
+.env.local
 gitignore
 
 # Dependencies

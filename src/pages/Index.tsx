@@ -2,9 +2,29 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, TrendingUp, Users, Smartphone, Code, Database, Palette } from "lucide-react";
+import { AuthModal } from "@/components/AuthModal";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const [isInstallPromptVisible, setIsInstallPromptVisible] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => {
+    if (user) {
+      // ログイン済みの場合はダッシュボードに遷移
+      navigate("/dashboard");
+    } else {
+      // 未ログインの場合は認証モーダルを表示
+      setIsAuthModalOpen(true);
+    }
+  };
+
+  const handleAuthSuccess = () => {
+    navigate("/dashboard");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -18,9 +38,9 @@ const Index = () => {
             家計の透明性を実現するPWA対応の家計簿アプリケーション
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
+            <Button size="lg" className="bg-blue-600 hover:bg-blue-700" onClick={handleGetStarted}>
               <PlusCircle className="mr-2 h-5 w-5" />
-              今すぐ始める
+              {user ? "ダッシュボードへ" : "今すぐ始める"}
             </Button>
             <Button variant="outline" size="lg">
               <Smartphone className="mr-2 h-5 w-5" />
@@ -159,6 +179,13 @@ const Index = () => {
           </p>
         </footer>
       </div>
+
+      {/* 認証モーダル */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={handleAuthSuccess}
+      />
     </div>
   );
 };
