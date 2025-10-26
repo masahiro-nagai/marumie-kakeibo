@@ -23,6 +23,7 @@ const Index = () => {
   };
 
   const handleAuthSuccess = () => {
+    toast.success("認証成功！ダッシュボードに遷移します。");
     navigate("/dashboard");
   };
 

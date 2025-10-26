@@ -8,7 +8,7 @@ import AuthTest from "./pages/AuthTest";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
 const App = () => (
-  <ErrorBoundary>
+  <>
     <Toaster />
     <BrowserRouter>
       <Routes>
@@ -19,7 +19,7 @@ const App = () => (
         <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </BrowserRouter>
-  </ErrorBoundary>
+  </>
 );
 
 export default App;

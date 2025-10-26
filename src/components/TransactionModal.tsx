@@ -20,6 +20,7 @@ interface Category {
   id: string;
   name: string;
   color: string;
+  type: string;
 }
 
 export function TransactionModal({ isOpen, onClose, onSuccess }: TransactionModalProps) {
@@ -39,7 +40,7 @@ export function TransactionModal({ isOpen, onClose, onSuccess }: TransactionModa
     if (isOpen && user) {
       fetchCategories();
     }
-  }, [isOpen, user]);
+  }, [isOpen, user, formData.type]); // formData.typeが変更された時も再取得
 
   const fetchCategories = async () => {
     try {
@@ -47,6 +48,7 @@ export function TransactionModal({ isOpen, onClose, onSuccess }: TransactionModa
         .from('categories')
         .select('*')
         .eq('user_id', user?.id)
+        .eq('type', formData.type) // 取引タイプに応じたカテゴリのみ取得
         .order('name');
 
       if (error) throw error;
@@ -98,10 +100,19 @@ export function TransactionModal({ isOpen, onClose, onSuccess }: TransactionModa
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [field]: value === "no-categories" ? "" : value
+      };
+      
+      // 取引タイプが変更された場合、カテゴリをリセット
+      if (field === "type") {
+        newData.category_id = "";
+      }
+      
+      return newData;
+    });
   };
 
   if (!isOpen) return null;
@@ -172,7 +183,10 @@ export function TransactionModal({ isOpen, onClose, onSuccess }: TransactionModa
             {/* カテゴリ */}
             <div className="space-y-2">
               <Label htmlFor="category">カテゴリ</Label>
-              <Select value={formData.category_id} onValueChange={(value) => handleInputChange("category_id", value)}>
+              <Select 
+                value={formData.category_id || undefined} 
+                onValueChange={(value) => handleInputChange("category_id", value)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="カテゴリを選択" />
                 </SelectTrigger>
@@ -189,7 +203,7 @@ export function TransactionModal({ isOpen, onClose, onSuccess }: TransactionModa
                     </SelectItem>
                   ))}
                   {categories.length === 0 && (
-                    <SelectItem value="" disabled>
+                    <SelectItem value="no-categories" disabled>
                       カテゴリがありません
                     </SelectItem>
                   )}

@@ -3,10 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { X, Tag, Palette } from "lucide-react";
+import { X, Tag, Palette, TrendingDown, TrendingUp } from "lucide-react";
 
 interface CategoryModalProps {
   isOpen: boolean;
@@ -33,6 +34,7 @@ export function CategoryModal({ isOpen, onClose, onSuccess }: CategoryModalProps
   const [formData, setFormData] = useState({
     name: "",
     color: defaultColors[0],
+    type: "expense" as "expense" | "income",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,6 +50,7 @@ export function CategoryModal({ isOpen, onClose, onSuccess }: CategoryModalProps
           user_id: user.id,
           name: formData.name,
           color: formData.color,
+          type: formData.type,
         });
 
       if (error) throw error;
@@ -60,6 +63,7 @@ export function CategoryModal({ isOpen, onClose, onSuccess }: CategoryModalProps
       setFormData({
         name: "",
         color: defaultColors[0],
+        type: "expense",
       });
     } catch (error: any) {
       console.error('カテゴリの作成に失敗しました:', error);
@@ -97,6 +101,23 @@ export function CategoryModal({ isOpen, onClose, onSuccess }: CategoryModalProps
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* カテゴリタイプ選択 */}
+            <div className="space-y-2">
+              <Label>カテゴリタイプ</Label>
+              <Tabs value={formData.type} onValueChange={(value) => handleInputChange("type", value)}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="expense" className="flex items-center gap-2">
+                    <TrendingDown className="h-4 w-4" />
+                    支出
+                  </TabsTrigger>
+                  <TabsTrigger value="income" className="flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4" />
+                    収入
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+
             {/* カテゴリ名 */}
             <div className="space-y-2">
               <Label htmlFor="name">カテゴリ名</Label>
@@ -105,7 +126,7 @@ export function CategoryModal({ isOpen, onClose, onSuccess }: CategoryModalProps
                 <Input
                   id="name"
                   type="text"
-                  placeholder="例: 食費、交通費、娯楽費"
+                  placeholder={formData.type === "expense" ? "例: 食費、交通費、娯楽費" : "例: 給与、ボーナス、副業"}
                   value={formData.name}
                   onChange={(e) => handleInputChange("name", e.target.value)}
                   className="pl-10"

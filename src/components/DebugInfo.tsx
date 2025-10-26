@@ -6,13 +6,32 @@ export function DebugInfo() {
 
   const testSupabaseConnection = async () => {
     try {
-      const { data, error } = await supabase
+      console.log('Supabase接続テストを開始...');
+      
+      // まず基本的な接続テスト
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      console.log('認証状態:', { authData, authError });
+      
+      // カテゴリテーブルのテスト
+      const { data: categoriesData, error: categoriesError } = await supabase
         .from('categories')
-        .select('count')
+        .select('*')
         .limit(1);
       
-      console.log('Supabase接続テスト:', { data, error });
-      return { success: !error, error };
+      console.log('カテゴリテーブルテスト:', { categoriesData, categoriesError });
+      
+      // 取引テーブルのテスト
+      const { data: transactionsData, error: transactionsError } = await supabase
+        .from('transactions')
+        .select('*')
+        .limit(1);
+      
+      console.log('取引テーブルテスト:', { transactionsData, transactionsError });
+      
+      return { 
+        success: !categoriesError && !transactionsError, 
+        error: categoriesError || transactionsError 
+      };
     } catch (err) {
       console.error('Supabase接続エラー:', err);
       return { success: false, error: err };

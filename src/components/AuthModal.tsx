@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { X, Mail, Lock, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
+  const navigate = useNavigate();
 
   if (!isOpen) return null;
 
@@ -31,9 +33,10 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
       if (error) {
         toast.error("ログインに失敗しました: " + error.message);
       } else {
-        toast.success("ログインしました！");
+        toast.success("ログインしました！ダッシュボードに遷移します。");
         onSuccess();
         onClose();
+        navigate("/dashboard");
       }
     } catch (error) {
       toast.error("ログイン中にエラーが発生しました");
@@ -51,9 +54,10 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
       if (error) {
         toast.error("アカウント作成に失敗しました: " + error.message);
       } else {
-        toast.success("アカウントを作成しました！確認メールをチェックしてください。");
+        toast.success("アカウントを作成しました！ダッシュボードに遷移します。");
         onSuccess();
         onClose();
+        navigate("/dashboard");
       }
     } catch (error) {
       toast.error("アカウント作成中にエラーが発生しました");

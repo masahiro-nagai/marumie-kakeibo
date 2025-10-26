@@ -1,15 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const AuthTest = () => {
   const { user, signIn, signUp, signOut, loading } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("test@example.com");
   const [password, setPassword] = useState("password123");
+
+  // ログイン済みの場合はダッシュボードに自動遷移
+  useEffect(() => {
+    if (user && !loading) {
+      console.log("ユーザーがログイン済みです。ダッシュボードに遷移します。");
+      toast.success("ログイン済みです。ダッシュボードに遷移します。");
+      navigate("/dashboard");
+    }
+  }, [user, loading, navigate]);
 
   const testSupabaseConnection = async () => {
     try {
@@ -33,7 +44,8 @@ const AuthTest = () => {
     if (error) {
       toast.error(`ログインエラー: ${error.message}`);
     } else {
-      toast.success("ログイン成功！");
+      toast.success("ログイン成功！ダッシュボードに遷移します。");
+      navigate("/dashboard");
     }
   };
 
@@ -49,7 +61,8 @@ const AuthTest = () => {
       if (data.user && !data.user.email_confirmed_at) {
         toast.success("登録成功！確認メールをチェックしてください。");
       } else {
-        toast.success("登録成功！ログインしました。");
+        toast.success("登録成功！ダッシュボードに遷移します。");
+        navigate("/dashboard");
       }
     }
   };
