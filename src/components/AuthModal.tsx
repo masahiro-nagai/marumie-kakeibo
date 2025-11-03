@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { X, Mail, Lock, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -31,7 +32,31 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
     try {
       const { error } = await signIn(email, password);
       if (error) {
-        toast.error("ログインに失敗しました: " + error.message);
+        if (error.message.includes("Email not confirmed")) {
+          toast.error("メールアドレスが確認されていません。確認メールをチェックしてください。", {
+            duration: 5000,
+            action: {
+              label: "再送信",
+              onClick: async () => {
+                try {
+                  const { error: resendError } = await supabase.auth.resend({
+                    type: 'signup',
+                    email: email,
+                  });
+                  if (resendError) {
+                    toast.error("再送信に失敗しました: " + resendError.message);
+                  } else {
+                    toast.success("確認メールを再送信しました。メールボックスを確認してください。");
+                  }
+                } catch (err) {
+                  toast.error("再送信中にエラーが発生しました");
+                }
+              },
+            },
+          });
+        } else {
+          toast.error("ログインに失敗しました: " + error.message);
+        }
       } else {
         toast.success("ログインしました！ダッシュボードに遷移します。");
         onSuccess();
@@ -50,14 +75,21 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
     setLoading(true);
 
     try {
-      const { error } = await signUp(email, password);
+      const { data, error } = await signUp(email, password);
       if (error) {
         toast.error("アカウント作成に失敗しました: " + error.message);
       } else {
-        toast.success("アカウントを作成しました！ダッシュボードに遷移します。");
-        onSuccess();
-        onClose();
-        navigate("/dashboard");
+        // メール確認が必要な場合
+        if (data.user && !data.user.email_confirmed_at) {
+          toast.success("アカウントを作成しました！確認メールをチェックしてください。", {
+            duration: 5000,
+          });
+        } else {
+          toast.success("アカウントを作成しました！ダッシュボードに遷移します。");
+          onSuccess();
+          onClose();
+          navigate("/dashboard");
+        }
       }
     } catch (error) {
       toast.error("アカウント作成中にエラーが発生しました");

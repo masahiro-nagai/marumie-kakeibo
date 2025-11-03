@@ -5,6 +5,7 @@ import { PlusCircle, TrendingUp, Users, Smartphone, Code, Database, Palette } fr
 import { AuthModal } from "@/components/AuthModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const Index = () => {
   const [isInstallPromptVisible, setIsInstallPromptVisible] = useState(false);
